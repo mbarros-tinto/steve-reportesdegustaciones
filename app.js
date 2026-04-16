@@ -440,6 +440,7 @@ function renderFondos(data) {
   var hayDosPlatos = data.some(function(d) { return !d.mismoPlato && d.proteina2; });
 
   var html = '<table class="fondos-table"><thead><tr>';
+  html += '<th>Fecha</th>';
   html += '<th>Evento</th>';
   html += '<th>Plato 1</th>';
   if (hayDosPlatos) html += '<th>Plato 2</th>';
@@ -452,6 +453,15 @@ function renderFondos(data) {
     var hasAlerts = d.alertas && d.alertas.length > 0;
 
     html += '<tr>';
+
+    // Fecha
+    html += '<td style="white-space:nowrap;font-size:13px;">';
+    if (d.fecha) {
+      html += escapeHtml(d.fecha);
+    } else {
+      html += '<span style="color:#ccc">\u2014</span>';
+    }
+    html += '</td>';
 
     // Evento + badge envios
     html += '<td><div class="fondos-evento">' + escapeHtml(d.codigo) + '</div>';
