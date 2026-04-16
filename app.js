@@ -436,7 +436,16 @@ function renderFondos(data) {
     '<div class="fondos-stat"><div class="fondos-stat-num" style="color:' + (conCambios > 0 ? '#e67e22' : '#1e8449') + '">' + conCambios + '</div><div class="fondos-stat-label">Con cambios</div></div>' +
     '<div class="fondos-stat"><div class="fondos-stat-num">' + conComentarios + '</div><div class="fondos-stat-label">Con comentarios</div></div>';
 
-  var html = '<table class="fondos-table"><thead><tr><th>Evento</th><th>Plato 1</th><th>Plato 2</th><th>Estado</th></tr></thead><tbody>';
+  // Tabla: columnas dependen de si hay platos con 2 fondos distintos
+  var hayDosPlatos = data.some(function(d) { return !d.mismoPlato && d.proteina2; });
+
+  var html = '<table class="fondos-table"><thead><tr>';
+  html += '<th>Evento</th>';
+  html += '<th>Plato 1</th>';
+  if (hayDosPlatos) html += '<th>Plato 2</th>';
+  html += '<th>Comentario</th>';
+  html += '<th>Estado</th>';
+  html += '</tr></thead><tbody>';
 
   for (var i = 0; i < data.length; i++) {
     var d = data[i];
@@ -444,13 +453,12 @@ function renderFondos(data) {
 
     html += '<tr>';
 
-    // Evento
+    // Evento + badge envios
     html += '<td><div class="fondos-evento">' + escapeHtml(d.codigo) + '</div>';
-    if (d.submissions > 1) html += ' <span class="badge badge-submissions">' + d.submissions + ' envios</span>';
-    if (d.comentario) html += '<div class="fondos-comment">' + escapeHtml(d.comentario) + '</div>';
+    if (d.submissions > 1) html += '<span class="badge badge-submissions">' + d.submissions + ' envios</span>';
     html += '</td>';
 
-    // Plato 1
+    // Plato 1: proteina + acompanamiento
     html += '<td class="fondos-plato">';
     if (d.proteina1) {
       html += '<span class="prot">' + escapeHtml(d.proteina1) + '</span>';
@@ -460,22 +468,33 @@ function renderFondos(data) {
     }
     html += '</td>';
 
-    // Plato 2
-    html += '<td class="fondos-plato">';
-    if (d.mismoPlato) {
-      html += '<span style="color:#999;font-size:12px">(Mismo plato)</span>';
-    } else if (d.proteina2) {
-      html += '<span class="prot">' + escapeHtml(d.proteina2) + '</span>';
-      if (d.acomp2) html += '<span class="sep">+</span><span class="acomp">' + escapeHtml(d.acomp2) + '</span>';
+    // Plato 2 (solo si la columna existe)
+    if (hayDosPlatos) {
+      html += '<td class="fondos-plato">';
+      if (d.mismoPlato) {
+        html += '<span style="color:#999;font-size:12px">(Mismo plato)</span>';
+      } else if (d.proteina2) {
+        html += '<span class="prot">' + escapeHtml(d.proteina2) + '</span>';
+        if (d.acomp2) html += '<span class="sep">+</span><span class="acomp">' + escapeHtml(d.acomp2) + '</span>';
+      } else {
+        html += '<span style="color:#ccc">\u2014</span>';
+      }
+      html += '</td>';
+    }
+
+    // Comentario
+    html += '<td>';
+    if (d.comentario) {
+      html += '<span class="fondos-comment-cell">' + escapeHtml(d.comentario) + '</span>';
     } else {
       html += '<span style="color:#ccc">\u2014</span>';
     }
     html += '</td>';
 
-    // Estado
+    // Estado / Alertas
     html += '<td>';
     if (!hasAlerts) {
-      html += '<span class="badge badge-ok">✓ OK</span>';
+      html += '<span class="badge badge-ok">\u2713 OK</span>';
     } else {
       for (var a = 0; a < d.alertas.length; a++) {
         var alerta = d.alertas[a];
